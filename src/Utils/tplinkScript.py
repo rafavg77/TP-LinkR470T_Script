@@ -41,6 +41,12 @@ class FirewallApi:
         self.firewallGetStatus2()
         self.firewallLogout()
 
+    def getArpDevices(self):
+        self.firewallLogin()
+        devices = self.arpList()
+        self.firewallLogout()
+        return devices
+
     def firewallLogin(self):
 
         SESSION = requests.Session()
@@ -132,6 +138,24 @@ class FirewallApi:
 
         logger.info("Status code:   %i" % response.status_code)
         logger.info("Response body: %s" % response.content)
+    
+    def arpList(self):
+        session = requests.Session()
+        paramsGet = {"form":"getlist"}
+        paramsPost = {"data":"{\"method\":\"get\",\"params\":{}}"}
+        headers = FW_HEADERS
+        cookies = self.Setcookie
+        response = session.post(BASE_URL+"/cgi-bin/luci/;stok={}/admin/arplist".format(self.responseSotk), data=paramsPost, params=paramsGet, headers=headers, cookies=cookies)
+
+        print("Status code:   %i" % response.status_code)
+
+        result=json.loads(response.content)
+        devices=result["result"]
+        logging.info("Cantidad de Dispositivos :" + str(len(devices)))
+        
+        return len(devices)
+
 
 #fw = FirewallApi()
 #fw.getAllWANStatus()
+#fw.getArpDevices()
